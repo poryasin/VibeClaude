@@ -154,6 +154,40 @@ class Plant {
     }
 }
 
+function createStableFlowerIcon() {
+    const size = 256;
+    const c = document.createElement('canvas');
+    c.width = size;
+    c.height = size;
+    const cctx = c.getContext('2d');
+
+    const petalCount = 6;
+    const petalSize = 64;
+    const hue = 230; 
+    const centerX = size / 2;
+    const centerY = size / 2;
+
+    for (let i = 0; i < petalCount; i++) {
+        const angle = (Math.PI * 2 / petalCount) * i;
+        const px = centerX + Math.cos(angle) * petalSize * 0.7;
+        const py = centerY + Math.sin(angle) * petalSize * 0.7;
+
+        cctx.fillStyle = `hsla(${hue}, 60%, 65%, 0.85)`;
+        cctx.beginPath();
+        cctx.arc(px, py, petalSize, 0, Math.PI * 2);
+        cctx.fill();
+    }
+
+    // ---- center ----
+    cctx.fillStyle = `hsla(${hue + 20}, 70%, 75%, 0.95)`;
+    cctx.beginPath();
+    cctx.arc(centerX, centerY, petalSize * 0.4, 0, Math.PI * 2);
+    cctx.fill();
+
+    return c.toDataURL('image/png');
+}
+
+
 function showMessage(msg) {
     message.textContent = msg;
     message.classList.add('show');
@@ -175,8 +209,8 @@ function updateCounter() {
 canvas.addEventListener('click', (e) => {
     const now = Date.now();
 
-    hasInteracted = true;        // ✅ บอกว่าผู้ใช้เคยคลิกแล้ว
-    hideHint();                  // ซ่อนทันที
+    hasInteracted = true;       
+    hideHint();                  
     hint.classList.remove('show');
 
     if (now - lastPlantTime < 300) return;
@@ -248,3 +282,8 @@ window.addEventListener('resize', () => {
 
 resetHintTimer();
 animate();
+
+const favicon = document.getElementById('flower-icon');
+if (favicon) {
+    favicon.href = createStableFlowerIcon();
+}
