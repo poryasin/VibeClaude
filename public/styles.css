@@ -1,11 +1,11 @@
-/* {
+html, body  {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-} */
+}
 
 body {
-    font-family: 'Georgia', serif;
+    font-family: "Georgia", serif;
     overflow: hidden;
     background: #0a0a14;
     color: #d4c5e8;
@@ -58,21 +58,37 @@ body {
 
 .hint {
     position: absolute;
-    top: 50%;
+    top: 80px;
     left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 16px;
+    transform: translateX(-50%);
+    font-size: 14px;
     opacity: 0;
-    transition: opacity 3s ease;
     text-align: center;
     letter-spacing: 1.5px;
     color: #c4b5d8;
     max-width: 400px;
     line-height: 1.8;
+    animation: gentlePulse 5s ease-in-out;
 }
 
 .hint.show {
     opacity: 0.5;
 }
 
-
+@keyframes gentlePulse {
+    0% {
+        opacity: 0;
+    }
+    30% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.4;
+    }
+    70% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+    }
+}
