@@ -92,3 +92,62 @@ body {
         opacity: 0;
     }
 }
+
+/* Mute Button */
+.mute-button {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    background: rgba(26, 26, 46, 0.4);
+    border: 1px solid rgba(184, 168, 212, 0.2);
+    border-radius: 50%;
+    color: rgba(184, 168, 212, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    transition: all 2s ease;
+    z-index: 100;
+    opacity: 0;
+    animation: fadeIn 3s ease 2s forwards;
+}
+
+.mute-button svg {
+    width: 20px;
+    height: 20px;
+    transition: all 2s ease;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+.mute-button:hover {
+    background: rgba(26, 26, 46, 0.6);
+    border-color: rgba(184, 168, 212, 0.4);
+    color: rgba(184, 168, 212, 0.7);
+}
+
+.mute-button:focus {
+    outline: none;
+    border-color: rgba(184, 168, 212, 0.5);
+    box-shadow: 0 0 10px rgba(184, 168, 212, 0.2);
+}
+
+.mute-button.muted svg {
+    opacity: 0.3;
+}
+
+.mute-button.muted::after {
+    content: '';
+    position: absolute;
+    width: 24px;
+    height: 2px;
+    background: rgba(184, 168, 212, 0.5);
+    transform: rotate(45deg);
+}

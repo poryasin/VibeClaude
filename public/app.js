@@ -3,6 +3,7 @@ const ctx = canvas.getContext('2d');
 const hint = document.getElementById('hint');
 const counter = document.getElementById('counter');
 const message = document.getElementById('message');
+const muteButton = document.getElementById('mute-button');
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -39,6 +40,182 @@ for (let i = 0; i < 100; i++) {
         twinkleSpeed: Math.random() * 0.02 + 0.005
     });
 }
+
+// Background Music System
+class BackgroundMusic {
+    constructor() {
+        this.audio = null;
+        this.isPlaying = false;
+        this.isMuted = false;
+
+        // 🔵 REPLACE THIS URL WITH YOUR MUSIC FILE
+        this.musicUrl = '/in the sea (extended).mp4'; // Local file in public folder
+    }
+
+    init() {
+        if (this.audio) return;
+
+        console.log('🎵 Initializing music system...');
+        console.log('📁 Music file:', this.musicUrl);
+
+        this.audio = new Audio();
+        this.audio.src = this.musicUrl;
+        this.audio.loop = true;
+        this.audio.volume = 0; // Start silent
+        this.audio.preload = 'auto';
+
+        // Add audio to DOM for debugging
+        this.audio.id = 'background-music';
+        this.audio.style.display = 'none';
+        document.body.appendChild(this.audio);
+        console.log('🔊 Audio element added to DOM');
+
+        this.audio.addEventListener('canplaythrough', () => {
+            console.log('✅ Music loaded and ready to play!');
+            console.log('📏 Duration:', this.audio.duration, 'seconds');
+        });
+
+        this.audio.addEventListener('error', (e) => {
+            console.log('❌ ERROR loading music!');
+            console.log('Error:', e);
+            console.log('Error code:', this.audio.error);
+            console.log('Network state:', this.audio.networkState);
+        });
+
+        this.audio.addEventListener('loadeddata', () => {
+            console.log('✅ Music data loaded');
+        });
+
+        this.audio.addEventListener('loadstart', () => {
+            console.log('⏳ Starting to load music...');
+        });
+    }
+
+    start() {
+        console.log('▶️ Start button clicked!');
+
+        if (!this.audio) {
+            this.init();
+        }
+
+        if (!this.isPlaying) {
+            this.isPlaying = true;
+            console.log('▶️ Attempting to play music...');
+
+            // Fade in volume
+            this.fadeIn();
+
+            const playPromise = this.audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    console.log('✅ Music is now playing!');
+                }).catch(e => {
+                    console.log('❌ Play failed!');
+                    console.log('Error:', e);
+                    console.log('Message:', e.message);
+                });
+            }
+
+            this.updateMuteButton();
+        } else {
+            console.log('⚠️ Music already playing');
+        }
+    }
+
+    stop() {
+        if (this.isPlaying) {
+            this.fadeOut();
+            setTimeout(() => {
+                this.audio.pause();
+                this.isPlaying = false;
+            }, 3000);
+            this.updateMuteButton();
+        }
+    }
+
+    fadeIn() {
+        const targetVolume = this.isMuted ? 0 : 0.5; // Volume at 50%
+        const duration = 3000; // 3 second fade in
+        const steps = 30;
+        const increment = targetVolume / steps;
+        const stepDuration = duration / steps;
+        let currentStep = 0;
+
+        console.log('🔊 Fading music in to volume:', targetVolume);
+
+        const fade = setInterval(() => {
+            currentStep++;
+            if (currentStep >= steps) {
+                this.audio.volume = targetVolume;
+                clearInterval(fade);
+                console.log('✅ Music volume:', targetVolume);
+            } else {
+                this.audio.volume = currentStep * increment;
+            }
+        }, stepDuration);
+    }
+
+    fadeOut() {
+        const duration = 3000; // 3 second fade out
+        const startVolume = this.audio.volume;
+        const steps = 50;
+        const decrement = startVolume / steps;
+        const stepDuration = duration / steps;
+        let currentStep = 0;
+
+        const fade = setInterval(() => {
+            currentStep++;
+            if (currentStep >= steps) {
+                this.audio.volume = 0;
+                clearInterval(fade);
+            } else {
+                this.audio.volume = startVolume - (currentStep * decrement);
+            }
+        }, stepDuration);
+    }
+
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+
+        if (this.isMuted) {
+            this.fadeOut();
+            console.log('Music muted');
+        } else {
+            this.fadeIn();
+            console.log('Music unmuted');
+        }
+
+        this.updateMuteButton();
+    }
+
+    updateMuteButton() {
+        if (!this.isPlaying) {
+            muteButton.classList.remove('muted');
+            muteButton.setAttribute('aria-label', 'Play Music');
+        } else if (this.isMuted) {
+            muteButton.classList.add('muted');
+            muteButton.setAttribute('aria-label', 'Unmute');
+        } else {
+            muteButton.classList.remove('muted');
+            muteButton.setAttribute('aria-label', 'Mute');
+        }
+    }
+
+    setMusicUrl(url) {
+        this.musicUrl = url;
+        if (this.audio) {
+            const wasPlaying = this.isPlaying;
+            this.audio.src = url;
+            if (wasPlaying) {
+                this.audio.play();
+            }
+        }
+    }
+}
+
+// Initialize background music
+const backgroundMusic = new BackgroundMusic();
+backgroundMusic.updateMuteButton(); // Set initial button state
 
 class Plant {
     constructor(x, y) {
@@ -244,6 +421,17 @@ function animate() {
 window.addEventListener('resize', () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
+});
+
+// Music button functionality - click to start/pause
+muteButton.addEventListener('click', (e) => {
+    e.stopPropagation(); // Don't plant when clicking music button
+
+    if (!backgroundMusic.isPlaying) {
+        backgroundMusic.start();
+    } else {
+        backgroundMusic.toggleMute();
+    }
 });
 
 resetHintTimer();
