@@ -12,6 +12,7 @@ const stars = [];
 let plantCount = 0;
 let lastPlantTime = 0;
 let hintTimeout;
+let hasInteracted = false;
 
 const messages = [
     "this is your space",
@@ -55,7 +56,7 @@ class Plant {
         this.glowIntensity = 0;
         this.leaves = [];
         this.leafCount = Math.floor(Math.random() * 2) + 2;
-        
+
         for (let i = 0; i < this.leafCount; i++) {
             this.leaves.push({
                 height: (i + 1) * (this.maxStemHeight / (this.leafCount + 1)),
@@ -68,10 +69,10 @@ class Plant {
     update() {
         if (this.age < this.maxAge) {
             this.age++;
-            
+
             const growthProgress = this.age / this.maxAge;
             this.stemHeight = this.maxStemHeight * Math.min(growthProgress * 2, 1);
-            
+
             if (growthProgress > 0.4) {
                 this.petalSize = this.maxPetalSize * Math.min((growthProgress - 0.4) * 1.6, 1);
             }
@@ -109,7 +110,7 @@ class Plant {
             if (leaf.size > 0) {
                 const leafY = this.y - leaf.height;
                 const leafX = this.x + sway * (leaf.height / this.stemHeight) + leaf.side * 8;
-                
+
                 ctx.fillStyle = `hsla(${this.hue - 30}, 45%, 40%, 0.6)`;
                 ctx.beginPath();
                 ctx.ellipse(leafX, leafY, leaf.size, leaf.size * 0.6, leaf.side * 0.5, 0, Math.PI * 2);
@@ -128,8 +129,8 @@ class Plant {
                 gradient.addColorStop(0, `hsla(${this.hue}, 70%, 70%, ${this.glowIntensity * 0.4})`);
                 gradient.addColorStop(1, 'transparent');
                 ctx.fillStyle = gradient;
-                ctx.fillRect(flowerX - this.maxPetalSize * 2, flowerY - this.maxPetalSize * 2, 
-                           this.maxPetalSize * 4, this.maxPetalSize * 4);
+                ctx.fillRect(flowerX - this.maxPetalSize * 2, flowerY - this.maxPetalSize * 2,
+                    this.maxPetalSize * 4, this.maxPetalSize * 4);
             }
 
             // Petals
@@ -173,9 +174,11 @@ function updateCounter() {
 
 canvas.addEventListener('click', (e) => {
     const now = Date.now();
-    
-    hideHint();
-    
+
+    hasInteracted = true;        // ✅ บอกว่าผู้ใช้เคยคลิกแล้ว
+    hideHint();                  // ซ่อนทันที
+    hint.classList.remove('show');
+
     if (now - lastPlantTime < 300) return;
     lastPlantTime = now;
 
@@ -195,14 +198,17 @@ canvas.addEventListener('click', (e) => {
     clearTimeout(hintTimeout);
 });
 
+
 function resetHintTimer() {
     clearTimeout(hintTimeout);
-    if (plantCount === 0) {
+
+    if (plantCount === 0 && !hasInteracted) {
         hintTimeout = setTimeout(() => {
             hint.classList.add('show');
         }, 2000);
     }
 }
+
 
 canvas.addEventListener('mousemove', () => {
     hideHint();
@@ -219,7 +225,7 @@ function animate() {
     stars.forEach(star => {
         star.alpha += Math.sin(time * star.twinkleSpeed) * 0.002;
         star.alpha = Math.max(0.1, Math.min(0.7, star.alpha));
-        
+
         ctx.fillStyle = `rgba(200, 180, 255, ${star.alpha})`;
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
